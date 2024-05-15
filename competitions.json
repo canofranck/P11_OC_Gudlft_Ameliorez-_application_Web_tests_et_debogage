@@ -11,9 +11,19 @@
             "numberOfPlaces": "13"
         },
         {
-            "name": "test competion soon",
+            "name": "test competition soon",
             "date": "2024-10-22 13:30:00",
             "numberOfPlaces": "45"
+        },
+        {
+            "name": "test competition test",
+            "date": "2024-10-22 13:30:00",
+            "numberOfPlaces": "65"
+        },
+        {
+            "name": "test competition test2",
+            "date": "2024-10-22 13:30:00",
+            "numberOfPlaces": "65"
         }
 
     ]

@@ -35,31 +35,52 @@ def show_summary():
 
 
 @app.route("/book/<competition>/<club>")
-
 def book(competition, club):
     try:
 
         foundClub = [c for c in clubs if c["name"] == club][0]
-        foundCompetition = [c for c in competitions if c["name"] == competition][0]
+        foundCompetition = [
+            c for c in competitions if c["name"] == competition
+        ][0]
     except IndexError:
         flash("Something went wrong-please try again")
         return (
-            render_template("welcome.html", club=club, competitions=competitions, clubs=clubs),
+            render_template(
+                "welcome.html",
+                club=club,
+                competitions=competitions,
+                clubs=clubs,
+            ),
             400,
         )
     if foundClub and foundCompetition:
-        competition_date = datetime.strptime(foundCompetition["date"], "%Y-%m-%d %H:%M:%S")
+        competition_date = datetime.strptime(
+            foundCompetition["date"], "%Y-%m-%d %H:%M:%S"
+        )
         if competition_date < datetime.now():
             flash("Error: can not purchase a place for past competitions")
-            return (render_template("welcome.html", club=foundClub, competitions=competitions, clubs=clubs,),
-                    200,
+            return (
+                render_template(
+                    "welcome.html",
+                    club=foundClub,
+                    competitions=competitions,
+                    clubs=clubs,
+                ),
+                200,
             )
 
-        return render_template("booking.html", club=foundClub, competition=foundCompetition)
+        return render_template(
+            "booking.html", club=foundClub, competition=foundCompetition
+        )
     else:
         flash("Something went wrong-please try again")
         return (
-            render_template("welcome.html", club=foundClub, competitions=competitions, clubs=clubs),
+            render_template(
+                "welcome.html",
+                club=foundClub,
+                competitions=competitions,
+                clubs=clubs,
+            ),
             400,
         )
 
@@ -74,7 +95,9 @@ def purchasePlaces():
     competition["numberOfPlaces"] = (
         int(competition["numberOfPlaces"]) - placesRequired
     )
+    club["points"] = int(club["points"]) - placesRequired
     flash("Great-booking complete!")
+
     return render_template(
         "welcome.html", club=club, competitions=competitions
     )

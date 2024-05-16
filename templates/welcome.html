@@ -1,29 +1,41 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Summary | GUDLFT Registration</title>
-</head>
-<body>
-        <h2>Welcome, {{club['email']}} </h2><a href="{{url_for('logout')}}">Logout</a>
+{% extends "base.html" %}
 
+{% block content %}
+
+    <h2>Welcome, {{ club['email'] }}</h2>
+
+    <h2><a href="{{url_for('logout')}}">Logout</a></h2>
+    <hr />
         {% include 'flash_message.html' %}
     Points available: {{club['points']}}
+    <hr />
+    <a href="{{url_for('pointsBoard')}}">Click here</a> for view the points board club.
     <h3>Competitions:</h3>
-    <ul>
-        {% for comp in competitions%}
-        <li>
-            {{comp['name']}}<br />
-            Date: {{comp['date']}}</br>
-            Number of Places: {{comp['numberOfPlaces']}}
-            {%if comp['numberOfPlaces']|int >0%}
-            <a href="{{ url_for('book',competition=comp['name'],club=club['name']) }}">Book Places</a>
-            {%endif%}
-        </li>
-        <hr />
-        {% endfor %}
-    </ul>
-    
+    <table>
+        <thead>
+            <tr>
+                <th>Competitions name</th>
+                <th>Date</th>
+                <th>available places</th>
+                <th>Booking here</th>
+            </tr>
+        </thead>
+        <tbody>
+        <ul>
+            {% for comp in competitions%}
+            <tr>
+                <td>{{comp['name']}}</td>
+                <td>Date: {{comp['date']}}</td>
+                <td>Number of Places: {{comp['numberOfPlaces']}}</td>
+                {%if comp['numberOfPlaces']|int >0%}
+                <td><a href="{{ url_for('book',competition=comp['name'],club=club['name']) }}">Book Places</a></td>
+                {%endif%}
+            </li>
+        
+            {% endfor %}
+            
+        </ul>
+        </tbody>
+    </table>
+    {% endblock %}
 
-</body>
-</html>

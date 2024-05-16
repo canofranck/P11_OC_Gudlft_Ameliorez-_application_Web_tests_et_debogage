@@ -89,11 +89,20 @@ def book(competition, club):
 
 @app.route("/purchasePlaces", methods=["POST"])
 def purchasePlaces():
+    try:
+        competition = [
+            c for c in competitions if c["name"] == request.form["competition"]
+        ]
+        club = [c for c in clubs if c["name"] == request.form["club"]]
 
-    competition = [
-        c for c in competitions if c["name"] == request.form["competition"]
-    ][0]
-    club = [c for c in clubs if c["name"] == request.form["club"]][0]
+        if not competition or not club:
+            flash("Competition or club not found.", "error")
+            return redirect(url_for("index")), 404
+        competition = competition[0]
+        club = club[0]
+    except StopIteration:
+        flash("Competition or club not found.", "error")
+        return redirect(url_for("index"))
 
     placesRequired = (
         int(request.form["places"]) if request.form["places"] else None
@@ -107,7 +116,7 @@ def purchasePlaces():
             ),
             400,
         )
-    # Vérifiez si la compétition est déjà dans la structure de données totalPlacesReserved
+
     if request.form["competition"] not in totalPlacesReserved:
         totalPlacesReserved[request.form["competition"]] = 0
 
@@ -119,8 +128,11 @@ def purchasePlaces():
         flash(
             "You have already booked 12 places for this competition.", "error"
         )
-        return render_template(
-            "welcome.html", club=club, competitions=competitions
+        return (
+            render_template(
+                "welcome.html", club=club, competitions=competitions
+            ),
+            403,
         )
 
     if placesRequired > int(club["points"]):
@@ -129,12 +141,18 @@ def purchasePlaces():
             render_template(
                 "booking.html", club=club, competition=competition
             ),
-            400,
+            403,
         )
     elif placesRequired > placesRemaining:
         flash(
             "Not enough places available, you are trying to book more than the remaining places.",
             "error",
+        )
+        return (
+            render_template(
+                "booking.html", club=club, competition=competition
+            ),
+            409,
         )
     elif placesRequired < 0:
         flash("You can't book a negative number of places.", "error")
@@ -150,7 +168,7 @@ def purchasePlaces():
             render_template(
                 "booking.html", club=club, competition=competition
             ),
-            400,
+            403,
         )
     elif totalPlacesForCompetition + placesRequired > 12:
         flash(

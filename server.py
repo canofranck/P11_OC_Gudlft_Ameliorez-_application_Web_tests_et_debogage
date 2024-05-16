@@ -17,7 +17,7 @@ def index():
 
 @app.route("/showSummary", methods=["POST"])
 def show_summary():
-    print(totalPlacesReserved)
+
     try:
         club = [
             club for club in clubs if club["email"] == request.form["email"]
@@ -37,7 +37,7 @@ def show_summary():
 
 @app.route("/book/<competition>/<club>")
 def book(competition, club):
-    print(totalPlacesReserved)
+
     try:
 
         foundClub = [c for c in clubs if c["name"] == club][0]
@@ -89,7 +89,7 @@ def book(competition, club):
 
 @app.route("/purchasePlaces", methods=["POST"])
 def purchasePlaces():
-    print(totalPlacesReserved)
+
     competition = [
         c for c in competitions if c["name"] == request.form["competition"]
     ][0]
@@ -125,6 +125,12 @@ def purchasePlaces():
 
     if placesRequired > int(club["points"]):
         flash("You don't have enough points.", "error")
+        return (
+            render_template(
+                "booking.html", club=club, competition=competition
+            ),
+            400,
+        )
     elif placesRequired > placesRemaining:
         flash(
             "Not enough places available, you are trying to book more than the remaining places.",
@@ -132,8 +138,20 @@ def purchasePlaces():
         )
     elif placesRequired < 0:
         flash("You can't book a negative number of places.", "error")
+        return (
+            render_template(
+                "booking.html", club=club, competition=competition
+            ),
+            400,
+        )
     elif placesRequired > 12:
         flash("You can't book more than 12 places in a competition.", "error")
+        return (
+            render_template(
+                "booking.html", club=club, competition=competition
+            ),
+            400,
+        )
     elif totalPlacesForCompetition + placesRequired > 12:
         flash(
             "You can't book more than 12 places for this competition.", "error"

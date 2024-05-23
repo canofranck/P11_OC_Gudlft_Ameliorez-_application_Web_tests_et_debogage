@@ -4,10 +4,26 @@ from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = "something_special"
+app.config.from_object("config.Config")
 
 competitions = load_competitions()
 clubs = load_clubs()
 totalPlacesReserved = {}
+
+
+def set_test_data(competitions_data, clubs_data):
+    global competitions
+    global clubs
+    competitions = competitions_data
+    clubs = clubs_data
+
+
+def search_competition(competition_name):
+    competition = [c for c in competitions if c["name"] == competition_name]
+    if len(competition) > 0:
+        return competition[0]
+    else:
+        return None
 
 
 @app.route("/")
@@ -15,9 +31,10 @@ def index():
     return render_template("index.html")
 
 
-@app.route("/showSummary", methods=["POST"])
+@app.route("/showSummary", methods=["POST", "GET"])
 def show_summary():
-
+    if request.method == "GET":
+        return redirect(url_for("index"))
     try:
         club = [
             club for club in clubs if club["email"] == request.form["email"]
@@ -38,13 +55,9 @@ def show_summary():
 @app.route("/book/<competition>/<club>")
 def book(competition, club):
 
-    try:
-
-        foundClub = [c for c in clubs if c["name"] == club][0]
-        foundCompetition = [
-            c for c in competitions if c["name"] == competition
-        ][0]
-    except IndexError:
+    foundClub = [c for c in clubs if c["name"] == club][0]
+    foundCompetition = search_competition(competition)
+    if foundCompetition == None:
         flash("Something went wrong-please try again")
         return (
             render_template(
@@ -55,6 +68,7 @@ def book(competition, club):
             ),
             400,
         )
+
     if foundClub and foundCompetition:
         competition_date = datetime.strptime(
             foundCompetition["date"], "%Y-%m-%d %H:%M:%S"
@@ -68,7 +82,7 @@ def book(competition, club):
                     competitions=competitions,
                     clubs=clubs,
                 ),
-                200,
+                400,
             )
 
         return render_template(
@@ -87,8 +101,10 @@ def book(competition, club):
         )
 
 
-@app.route("/purchasePlaces", methods=["POST"])
+@app.route("/purchasePlaces", methods=["POST", "GET"])
 def purchasePlaces():
+    if request.method == "GET":
+        return redirect(url_for("index"))
     try:
         competition = [
             c for c in competitions if c["name"] == request.form["competition"]
@@ -108,6 +124,12 @@ def purchasePlaces():
         int(request.form["places"]) if request.form["places"] else None
     )
     placesRemaining = int(competition["numberOfPlaces"])
+
+    print(
+        "Initial competition places:", competition["numberOfPlaces"]
+    )  # Debug print
+    print("Initial club points:", club["points"])  # Debug print
+    print("dans fonction placesRequi", placesRequired)
     if placesRequired is None:
         flash("Please enter the number of places to reserve.", "error")
         return (
@@ -136,6 +158,7 @@ def purchasePlaces():
         )
 
     if placesRequired > int(club["points"]):
+
         flash("You don't have enough points.", "error")
         return (
             render_template(
@@ -144,6 +167,7 @@ def purchasePlaces():
             403,
         )
     elif placesRequired > placesRemaining:
+
         flash(
             "Not enough places available, you are trying to book more than the remaining places.",
             "error",
@@ -180,6 +204,10 @@ def purchasePlaces():
             int(competition["numberOfPlaces"]) - placesRequired
         )
         club["points"] = int(club["points"]) - placesRequired
+        print(
+            "Updated competition places:", competition["numberOfPlaces"]
+        )  # Debug print
+        print("Updated club points:", club["points"])  # Debug print
         flash("Great-booking complete!")
 
     return render_template(
@@ -200,3 +228,7 @@ def pointsBoard():
 @app.route("/logout")
 def logout():
     return redirect(url_for("index"))
+
+
+if __name__ == "__main__":
+    app.run(debug=True)

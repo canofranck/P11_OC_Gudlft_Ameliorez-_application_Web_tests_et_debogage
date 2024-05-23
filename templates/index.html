@@ -2,6 +2,7 @@
 
 {% block content %}
     <h1>Welcome to the GUDLFT Registration Portal!</h1>
+   
     Please enter your secretary email to continue:
     <form action="showSummary" method="post">
         <label for="email">Email:</label>
@@ -9,4 +10,7 @@
         <button type="submit">Enter</button>
     </form>
     {% include 'flash_message.html' %}
+    <hr />
+    <a href="{{url_for('pointsBoard')}}">Click here</a> for view the points board club.
+    <hr />
 {% endblock %}

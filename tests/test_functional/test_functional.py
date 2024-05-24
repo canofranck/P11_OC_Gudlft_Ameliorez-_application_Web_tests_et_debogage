@@ -1,7 +1,10 @@
 import pytest
-
+import json
 from flask_testing import TestCase
 from server import app, set_test_data
+from utils import load_competitions, load_clubs
+import shutil
+import tempfile
 
 competitions = [
     {
@@ -27,8 +30,20 @@ def client():
     with app.test_client() as client:
         with app.app_context():
 
-            set_test_data(competitions.copy(), clubs.copy())
+            set_test_data(load_competitions(), load_clubs())
         yield client
+
+
+def reset_data():
+    # Charger les données initiales à partir des fichiers JSON
+    initial_competitions = load_competitions()
+    initial_clubs = load_clubs()
+
+    # Réinitialiser les données dans les fichiers JSON avec les données initiales
+    with open("competitions.json", "w") as f:
+        json.dump({"competitions": initial_competitions}, f, indent=4)
+    with open("clubs.json", "w") as f:
+        json.dump({"clubs": initial_clubs}, f, indent=4)
 
 
 class FunctionalTest(TestCase):

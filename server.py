@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, flash, url_for
-from utils import load_clubs, load_competitions
+from utils import load_clubs, load_competitions, save_clubs, save_competitions
 from datetime import datetime
 
 app = Flask(__name__)
@@ -54,7 +54,6 @@ def show_summary():
 
 @app.route("/book/<competition>/<club>")
 def book(competition, club):
-
     foundClub = [c for c in clubs if c["name"] == club][0]
     foundCompetition = search_competition(competition)
     if foundCompetition == None:
@@ -125,11 +124,6 @@ def purchasePlaces():
     )
     placesRemaining = int(competition["numberOfPlaces"])
 
-    print(
-        "Initial competition places:", competition["numberOfPlaces"]
-    )  # Debug print
-    print("Initial club points:", club["points"])  # Debug print
-    print("dans fonction placesRequi", placesRequired)
     if placesRequired is None:
         flash("Please enter the number of places to reserve.", "error")
         return (
@@ -158,7 +152,6 @@ def purchasePlaces():
         )
 
     if placesRequired > int(club["points"]):
-
         flash("You don't have enough points.", "error")
         return (
             render_template(
@@ -167,7 +160,6 @@ def purchasePlaces():
             403,
         )
     elif placesRequired > placesRemaining:
-
         flash(
             "Not enough places available, you are trying to book more than the remaining places.",
             "error",
@@ -204,10 +196,11 @@ def purchasePlaces():
             int(competition["numberOfPlaces"]) - placesRequired
         )
         club["points"] = int(club["points"]) - placesRequired
-        print(
-            "Updated competition places:", competition["numberOfPlaces"]
-        )  # Debug print
-        print("Updated club points:", club["points"])  # Debug print
+
+        # Save changes to JSON files
+        # save_competitions(competitions)
+        # save_clubs(clubs)
+
         flash("Great-booking complete!")
 
     return render_template(
@@ -217,11 +210,9 @@ def purchasePlaces():
 
 @app.route("/pointsBoard")
 def pointsBoard():
-
     club_list = sorted(
         clubs, key=lambda club: int(club["points"]), reverse=True
     )
-
     return render_template("points_board.html", clubs=club_list)
 
 

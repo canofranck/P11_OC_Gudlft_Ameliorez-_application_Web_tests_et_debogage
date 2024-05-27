@@ -44,6 +44,7 @@ def reset_data():
         json.dump({"clubs": initial_clubs}, f, indent=4)
 
 
+@pytest.mark.integtest
 class FunctionalTest(TestCase):
 
     def create_app(self):
@@ -135,7 +136,6 @@ class FunctionalTest(TestCase):
             c for c in competitions if c["name"] == "test competition soon"
         )
         initial_places = int(competition["numberOfPlaces"])
-
         data = {
             "competition": "test competition soon",
             "club": "Simply Lift",

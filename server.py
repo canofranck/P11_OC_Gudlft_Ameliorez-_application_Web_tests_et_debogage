@@ -1,5 +1,13 @@
 from flask import Flask, render_template, request, redirect, flash, url_for
-from utils import load_clubs, load_competitions, save_clubs, save_competitions
+from utils import (
+    load_clubs,
+    load_competitions,
+    search_club_email,
+    search_club_name,
+    search_competition,
+    save_clubs,
+    save_competitions,
+)
 from datetime import datetime
 
 app = Flask(__name__)
@@ -12,51 +20,76 @@ totalPlacesReserved = {}
 
 
 def set_test_data(competitions_data, clubs_data):
+    """
+    Sets the test data for competitions and clubs.
+
+    Parameters:
+    competitions_data (list): List of competitions data.
+    clubs_data (list): List of clubs data.
+    """
+
     global competitions
     global clubs
     competitions = competitions_data
     clubs = clubs_data
 
 
-def search_competition(competition_name):
-    competition = [c for c in competitions if c["name"] == competition_name]
-    if len(competition) > 0:
-        return competition[0]
-    else:
-        return None
-
-
 @app.route("/")
 def index():
+    """
+    Renders the index page.
+
+    Returns:
+    Response: The rendered index page.
+    """
+
     return render_template("index.html")
 
 
 @app.route("/showSummary", methods=["POST", "GET"])
 def show_summary():
+    """
+    Displays the summary page for a club.
+
+    If the request method is GET, it redirects to the index page.
+    If the request method is POST, it searches for the club by email
+    and displays the welcome page if the club is found, otherwise shows an error.
+
+    Returns:
+    Response: The rendered welcome page or an error message.
+    """
+
     if request.method == "GET":
         return redirect(url_for("index"))
-    try:
-        club = [
-            club for club in clubs if club["email"] == request.form["email"]
-        ][0]
+    foundclub = search_club_email(request.form["email"], clubs)
+    if foundclub == None:
+        flash("No account related to this email.", "error")
+        return render_template("index.html"), 401
+    else:
+        club = foundclub
         return render_template(
             "welcome.html",
             club=club,
             competitions=competitions,
         )
-    except IndexError:
-        if request.form["email"] == "":
-            flash("Please enter your email.", "error")
-        else:
-            flash("No account related to this email.", "error")
-        return render_template("index.html"), 401
 
 
 @app.route("/book/<competition>/<club>")
 def book(competition, club):
-    foundClub = [c for c in clubs if c["name"] == club][0]
-    foundCompetition = search_competition(competition)
-    if foundCompetition == None:
+    """
+    Displays the booking page for a specific competition and club.
+
+    Parameters:
+    competition (str): The name of the competition.
+    club (str): The name of the club.
+
+    Returns:
+    Response: The rendered booking page or an error message.
+    """
+
+    foundClub = search_club_name(club, clubs)
+    foundCompetition = search_competition(competition, competitions)
+    if foundCompetition == None or foundClub == None:
         flash("Something went wrong-please try again")
         return (
             render_template(
@@ -102,19 +135,30 @@ def book(competition, club):
 
 @app.route("/purchasePlaces", methods=["POST", "GET"])
 def purchasePlaces():
+    """
+    Handles the place purchasing for a competition.
+
+    If the request method is GET, it redirects to the index page.
+    If the request method is POST, it processes the place purchase request
+    and updates the competition and club data accordingly.
+
+    Returns:
+    Response: The rendered welcome page or an error message.
+    """
+
     if request.method == "GET":
         return redirect(url_for("index"))
     try:
-        competition = [
-            c for c in competitions if c["name"] == request.form["competition"]
-        ]
-        club = [c for c in clubs if c["name"] == request.form["club"]]
+        competition = search_competition(
+            request.form["competition"], competitions
+        )
 
-        if not competition or not club:
+        club = search_club_name(request.form["club"], clubs)
+
+        if competition == None or club == None:
             flash("Competition or club not found.", "error")
             return redirect(url_for("index")), 404
-        competition = competition[0]
-        club = club[0]
+
     except StopIteration:
         flash("Competition or club not found.", "error")
         return redirect(url_for("index"))
@@ -210,6 +254,13 @@ def purchasePlaces():
 
 @app.route("/pointsBoard")
 def pointsBoard():
+    """
+    Displays the points board.
+
+    Returns:
+    Response: The rendered points board page.
+    """
+
     club_list = sorted(
         clubs, key=lambda club: int(club["points"]), reverse=True
     )
@@ -218,6 +269,13 @@ def pointsBoard():
 
 @app.route("/logout")
 def logout():
+    """
+    Logs out the user by redirecting to the index page.
+
+    Returns:
+    Response: Redirect to the index page.
+    """
+
     return redirect(url_for("index"))
 
 

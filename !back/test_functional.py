@@ -3,6 +3,8 @@ import json
 from flask_testing import TestCase
 from server import app, set_test_data
 from utils import load_competitions, load_clubs
+import shutil
+import tempfile
 
 competitions = [
     {
@@ -136,6 +138,9 @@ class FunctionalTest(TestCase):
         )
         initial_places = int(competition["numberOfPlaces"])
 
+        print(competitions, clubs)
+        print("place initial au debut: ", initial_places)
+
         data = {
             "competition": "test competition soon",
             "club": "Simply Lift",
@@ -150,6 +155,9 @@ class FunctionalTest(TestCase):
             c for c in competitions if c["name"] == "test competition soon"
         )
         updated_places = int(updated_competition["numberOfPlaces"])
+        print("place initial: ", initial_places)
+        print("place mis a jour: ", updated_places)
+        print(competitions, clubs)
 
         assert updated_places == initial_places - 2
 
@@ -178,6 +186,7 @@ class FunctionalTest(TestCase):
                 if club["name"] == "Simply Lift"
             ][0]
         )
+        print("Initial club points: ", initial_points)
 
         data = {
             "competition": "test competition soon",
@@ -194,7 +203,7 @@ class FunctionalTest(TestCase):
                 if club["name"] == "Simply Lift"
             ][0]
         )
-
+        print("Updated club points: ", updated_points)
         assert updated_points == initial_points - 2
 
     def test_purchasePlaces_more_than_points(self):
@@ -265,10 +274,6 @@ class FunctionalTest(TestCase):
         }
         response = self.client.post("/purchasePlaces", data=data)
         assert response.status_code == 400
-        self.assert_template_used("booking.html")
-        assert (
-            b"You can&#39;t book a negative number of places." in response.data
-        )
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@
 # gudlift
 
 
- ![Locus_report](locsut_result/locust.png)
+ ![Locus_report](locust_result/locust.png)
 
 
 

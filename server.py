@@ -90,7 +90,7 @@ def book(competition, club):
     foundClub = search_club_name(club, clubs)
     foundCompetition = search_competition(competition, competitions)
     if foundCompetition == None or foundClub == None:
-        flash("Something went wrong-please try again")
+        flash("Something went wrong-please try again", "error")
         return (
             render_template(
                 "welcome.html",
@@ -106,7 +106,10 @@ def book(competition, club):
             foundCompetition["date"], "%Y-%m-%d %H:%M:%S"
         )
         if competition_date < datetime.now():
-            flash("Error: can not purchase a place for past competitions")
+            flash(
+                "Error: can not purchase a place for past competitions",
+                "error",
+            )
             return (
                 render_template(
                     "welcome.html",
@@ -121,7 +124,7 @@ def book(competition, club):
             "booking.html", club=foundClub, competition=foundCompetition
         )
     else:
-        flash("Something went wrong-please try again")
+        flash("Something went wrong-please try again", "error")
         return (
             render_template(
                 "welcome.html",
@@ -245,7 +248,7 @@ def purchasePlaces():
         # save_competitions(competitions)
         # save_clubs(clubs)
 
-        flash("Great-booking complete!")
+        flash("Great-booking complete!", "error")
 
     return render_template(
         "welcome.html", club=club, competitions=competitions

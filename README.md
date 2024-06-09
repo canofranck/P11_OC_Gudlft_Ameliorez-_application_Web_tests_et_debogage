@@ -3,6 +3,7 @@
 
 # gudlift
 
+
 Plateforme de réservation de places à des compétitions de force pour l'entreprise Güdlft.
 
 L'objectif du projet est de corriger les erreurs et bugs présents dans le projet 
@@ -78,5 +79,4 @@ Se rendre sur l'adresse [http://localhost:8089](http://localhost:8089) et entrer
 
  ![Locus_report](locust_result/locust.png)
 
-
-
+ 

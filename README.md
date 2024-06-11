@@ -77,10 +77,5 @@ Se rendre sur l'adresse [http://localhost:8089](http://localhost:8089) et entrer
 
 ### Rapports
 
-![Coverage_report](result_coverage_test/coverage_test.png)
-![Locus_report](locust_result/locust.png)
- 
-# gudlift
-
-
- ![Locus_report](result_locust/locust.png)
+![Coverage_report](result_coverage_test/coverage_test .png)
+![Locus_report](result_locust/locust.png)
